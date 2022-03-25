@@ -8,7 +8,7 @@ FOR /f %%i in ("%TEMP%\PortCheck.tmp") do set SIZE=%%~zi
 IF %SIZE% gtr 0 SET PORT=60080
 :INPUTS
 CLS
-ECHO.-------------------------------- & ECHO. Pi-hole for Windows v.20220128 & ECHO.-------------------------------- & ECHO.
+ECHO.----------------------------- & ECHO. Pi-hole for Windows on ARM v.20220325 & ECHO.----------------------------- & ECHO.
 SET PRGP=%PROGRAMFILES%&SET /P "PRGP=Set location for 'Pi-hole' install folder or hit enter for default [%PROGRAMFILES%] -> "
 IF %PRGP:~-1%==\ SET PRGP=%PRGP:~0,-1%
 SET PRGF=%PRGP%\Pi-hole
@@ -17,14 +17,13 @@ WSL.EXE -d Pi-hole -e . > "%TEMP%\InstCheck.tmp"
 FOR /f %%i in ("%TEMP%\InstCheck.tmp") do set CHKIN=%%~zi 
 IF %CHKIN% == 0 (ECHO. & ECHO Existing Pi-hole installation detected, uninstall Pi-hole first. & PAUSE & GOTO INPUTS)
 ECHO.
-ECHO.Pi-hole will be installed in "%PRGF%" and Web Admin will listen on port %PORT%
-PAUSE 
+ECHO.Pi-hole will be installed in "%PRGF%" and Web Admin will listen on port %PORT% 
 %PRGF:~0,2% & MKDIR "%PRGF%" & CD "%PRGF%" & MKDIR "logs" 
 ECHO Downloading packages . . .
 POWERSHELL.EXE -Command "Invoke-WebRequest https://github.com/DesktopECHO/Pi-Hole-for-WOA/archive/refs/heads/main.zip -OutFile PH4WoA.zip"
 POWERSHELL.EXE -Command "Expand-Archive -Force -Path '.\PH4WoA.zip' ; Remove-Item '.\PH4WoA.zip'"
 POWERSHELL.EXE -Command "Expand-Archive -Force -Path '.\PH4WoA\Pi-Hole-for-WOA-main\LxRunOffline-v3.5.0-33-gbdc6d7d-msvc.zip' -DestinationPath '%TEMP%' ; Copy-Item '%TEMP%\LxRunOffline-v3.5.0-33-gbdc6d7d-msvc\LxRunOffline.exe' '%PRGF%'"
-POWERSHELL.EXE -Command "Expand-Archive -Force -Path '.\PH4WoA\Pi-Hole-for-WOA-main\Debian.zip' -DestinationPath '%TEMP%' ; wsl --import Pi-hole '%PRGF%' '%TEMP%\install.tar'"
+POWERSHELL.EXE -Command "Expand-Archive -Force -Path '.\PH4WoA\Pi-Hole-for-WOA-main\Debian.zip' -DestinationPath '%TEMP%' ; wsl --import Pi-hole '%PRGF%' '%TEMP%\install.tar' --version 1"
 FOR /F "usebackq delims=" %%v IN (`PowerShell -Command "whoami"`) DO set "WAI=%%v"
 ICACLS "%PRGF%" /grant "%WAI%:(CI)(OI)F" > NUL
 ECHO @ECHO OFF ^& CLS ^& NET SESSION ^>NUL 2^>^&1                                  > "%PRGF%\Pi-hole Uninstall.cmd"
