@@ -19,11 +19,12 @@ IF %CHKIN% == 0 (ECHO. & ECHO Existing Pi-hole installation detected, uninstall 
 ECHO.
 ECHO.Pi-hole will be installed in "%PRGF%" and Web Admin will listen on port %PORT%
 PAUSE 
-ECHO Downloading packages . . .
-IF NOT EXIST %TEMP%\Debian.tar.gz POWERSHELL.EXE -Command "Invoke-WebRequest https://github.com/DesktopECHO/Pi-Hole-for-WoA/raw/04a3932353dc1826691b772340766f38ea1bc51a/Debian.tar.gz -OutFile '%TEMP%\Debian.tar.gz'"
 %PRGF:~0,2% & MKDIR "%PRGF%" & CD "%PRGF%" & MKDIR "logs" 
-POWERSHELL.EXE -Command "Invoke-WebRequest https://github.com/DesktopECHO/Pi-Hole-for-WOA/archive/refs/heads/main.zip -OutFile PH4WoA.zip ; Expand-Archive 'PH4WoA.zip' -Force ; echo Remove-Item 'PH4WoA.zip'"
+ECHO Downloading packages . . .
+POWERSHELL.EXE -Command "Invoke-WebRequest https://github.com/DesktopECHO/Pi-Hole-for-WOA/archive/refs/heads/main.zip -OutFile PH4WoA.zip"
+POWERSHELL.EXE -Command "Expand-Archive -Force -Path '.\PH4WoA.zip' ; Remove-Item '.\PH4WoA.zip'"
 POWERSHELL.EXE -Command "Expand-Archive -Force -Path '.\PH4WoA\Pi-Hole-for-WOA-main\LxRunOffline-v3.5.0-33-gbdc6d7d-msvc.zip' -DestinationPath '%TEMP%' ; Copy-Item '%TEMP%\LxRunOffline-v3.5.0-33-gbdc6d7d-msvc\LxRunOffline.exe' '%PRGF%'"
+POWERSHELL.EXE -Command "Expand-Archive -Force -Path '.\PH4WoA\Pi-Hole-for-WOA-main\Debian.zip' -DestinationPath '%TEMP%' ; wsl --import Pi-hole '%PRGF%' '%TEMP%\install.tar'"
 FOR /F "usebackq delims=" %%v IN (`PowerShell -Command "whoami"`) DO set "WAI=%%v"
 ICACLS "%PRGF%" /grant "%WAI%:(CI)(OI)F" > NUL
 ECHO @ECHO OFF ^& CLS ^& NET SESSION ^>NUL 2^>^&1                                  > "%PRGF%\Pi-hole Uninstall.cmd"
