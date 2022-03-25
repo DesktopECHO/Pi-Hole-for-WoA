@@ -20,10 +20,10 @@ ECHO.
 ECHO.Pi-hole will be installed in "%PRGF%" and Web Admin will listen on port %PORT%
 PAUSE 
 ECHO Downloading packages . . .
-IF NOT EXIST %TEMP%\Debian.tar.gz POWERSHELL.EXE -Command "Invoke-WebRequest https://github.com/DesktopECHO/Pi-Hole-for-WoA/blob/3e8a8b4422a9d3b60546a748f9026e7814d39fd4/Debian.tar.gz -OutFile '%TEMP%\Debian.tar.gz'"
+IF NOT EXIST %TEMP%\Debian.tar.gz POWERSHELL.EXE -Command "Invoke-WebRequest https://github.com/DesktopECHO/Pi-Hole-for-WoA/raw/04a3932353dc1826691b772340766f38ea1bc51a/Debian.tar.gz -OutFile '%TEMP%\Debian.tar.gz'"
 %PRGF:~0,2% & MKDIR "%PRGF%" & CD "%PRGF%" & MKDIR "logs" 
-POWERSHELL.EXE -Command "Invoke-WebRequest https://github.com/DesktopECHO/Pi-Hole-for-WOA/archive/refs/heads/main.zip -OutFile PH4WOA.zip ; Expand-Archive 'PH4WOA.zip' -Force ; echo Remove-Item 'PH4WOA.zip'"
-POWERSHELL.EXE -Command "Expand-Archive -Force -Path '.\PH4WOA\Pi-Hole-for-WOA-main\LxRunOffline-v3.5.0-33-gbdc6d7d-msvc.zip' -DestinationPath '%TEMP%' ; Copy-Item '%TEMP%\LxRunOffline-v3.5.0-33-gbdc6d7d-msvc\LxRunOffline.exe' '%PRGF%'"
+POWERSHELL.EXE -Command "Invoke-WebRequest https://github.com/DesktopECHO/Pi-Hole-for-WOA/archive/refs/heads/main.zip -OutFile PH4WoA.zip ; Expand-Archive 'PH4WoA.zip' -Force ; echo Remove-Item 'PH4WoA.zip'"
+POWERSHELL.EXE -Command "Expand-Archive -Force -Path '.\PH4WoA\Pi-Hole-for-WOA-main\LxRunOffline-v3.5.0-33-gbdc6d7d-msvc.zip' -DestinationPath '%TEMP%' ; Copy-Item '%TEMP%\LxRunOffline-v3.5.0-33-gbdc6d7d-msvc\LxRunOffline.exe' '%PRGF%'"
 FOR /F "usebackq delims=" %%v IN (`PowerShell -Command "whoami"`) DO set "WAI=%%v"
 ICACLS "%PRGF%" /grant "%WAI%:(CI)(OI)F" > NUL
 ECHO @ECHO OFF ^& CLS ^& NET SESSION ^>NUL 2^>^&1                                  > "%PRGF%\Pi-hole Uninstall.cmd"
@@ -50,8 +50,8 @@ SET GO="%PRGF%\LxRunOffline.exe" r -n Pi-hole -c
 %GO% "apt-get -y purge dmsetup libapparmor1 libargon2-1 libdevmapper1.02.1 libestr0 libfastjson4 liblognorm5 rsyslog systemd systemd-sysv vim-common vim-tiny xxd --autoremove --allow-remove-essential" > "%PRGF%\logs\Pi-hole Compact Stage.log"
 %GO% "rm -rf /etc/apt/apt.conf.d/20snapd.conf /etc/rc2.d/S01whoopsie /etc/init.d/console-setup.sh /etc/init.d/udev"
 ECHO.-^> Install dependencies . . .
-%GO% "apt-get -y --allow-downgrades install ./PH4WOA/Pi-Hole-for-WOA-main/deb/*.deb" > "%PRGF%\logs\Pi-hole Dependency Stage.log"
-%GO% "cp ./PH4WOA/Pi-Hole-for-WOA-main/ss /.ss ; chmod +x /.ss ; cp /.ss /bin/ss ; cp  ./PH4WOA/Pi-Hole-for-WOA-main/pi-hole.conf /etc/unbound/unbound.conf.d/pi-hole.conf" 
+%GO% "apt-get -y --allow-downgrades install ./PH4WoA/Pi-Hole-for-WOA-main/deb/*.deb" > "%PRGF%\logs\Pi-hole Dependency Stage.log"
+%GO% "cp ./PH4WoA/Pi-Hole-for-WOA-main/ss /.ss ; chmod +x /.ss ; cp /.ss /bin/ss ; cp  ./PH4WoA/Pi-Hole-for-WOA-main/pi-hole.conf /etc/unbound/unbound.conf.d/pi-hole.conf" 
 %GO% "sed -i 's#^ssh             22/tcp#ssh           5322/tcp#g' /etc/services ;  sed -i 's/#UseDNS no/UseDNS no/g' /etc/ssh/sshd_config"
 %GO% "mkdir /etc/pihole ; touch /etc/network/interfaces ; update-rc.d ssh disable"
 %GO% "IPC=$(ip route get 1.1.1.1 | grep -oP 'src \K\S+') ; IPC=$(ip -o addr show | grep $IPC) ; echo $IPC | sed 's/.*inet //g' | sed 's/\s.*$//'" > logs\IPC.tmp && set /p IPC=<logs\IPC.tmp
@@ -108,7 +108,7 @@ ECHO IF NOT EXIST ".\Logs\Gravity Sync.log"          MKLINK /H ".\Logs\Gravity S
 ECHO IF NOT EXIST ".\Logs\Gravity Sync Cron Job.log" MKLINK /H ".\Logs\Gravity Sync Cron Job.log" .\rootfs\home\gs4wsl1\gravity-sync\logs\gravity-sync.cron^>nul 2^>^&1  >> "%PRGF%\Gravity Sync - Setup.cmd"
 ECHO IF EXIST "%PRGF%\rootfs\home\gs4wsl1\PRIMARY" @ECHO @%GO% "su - gs4wsl1 -c ./gravity-sync/gravity-sync.sh smart ; sleep 5" ^> "Gravity Sync - Smart Sync.cmd"       >> "%PRGF%\Gravity Sync - Setup.cmd"
 ECHO ECHO.^&ECHO To close this window, ^& PAUSE                                                                                                                          >> "%PRGF%\Gravity Sync - Setup.cmd"
-RD /S /Q "%PRGF%\PH4WOA" & %GO% "echo ; echo -n 'Pi-hole Web Admin, ' ; pihole -a -p"
+RD /S /Q "%PRGF%\PH4WoA" & %GO% "echo ; echo -n 'Pi-hole Web Admin, ' ; pihole -a -p"
 START /WAIT /MIN "Pi-hole Launcher" "%PRGF%\Pi-hole Launcher.cmd"  
 (ECHO.Input Specifications: & ECHO. && ECHO. Location: %PRGF% && ECHO.Interface: %IPF% && ECHO.  Address: %IPC% && ECHO.     Port: %PORT% && ECHO.     Temp: %TEMP% && ECHO.) >  "%PRGF%\logs\Pi-hole Inputs.log"
 DIR "%PRGF%" >> "%PRGF%\logs\Pi-hole Inputs.log"
